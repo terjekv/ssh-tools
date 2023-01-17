@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+# Check if the current host has an interface on a given network
+# Note that routing is currently not checked, so you may have an interface
+# on the desired network, but you can also be set up not to route any traffic
+# through that interface. Interesting choice.
+# Usage: i_am_within_network network
+# Example: i_am_within_network 172.16.0.0/16
+
+# Exit codes: 0 - true, 1 - false
+import ipaddress
+import sys
+
+from ifaddr import get_adapters
+
+
+def ip4_addresses():
+    ip_list = []
+    for adapter in get_adapters():
+        for ip in adapter.ips:
+            actual_ip = ip.ip
+            if isinstance(ip.ip, tuple):
+                actual_ip = ip.ip[0]
+            ip_list.append(actual_ip)
+    return ip_list
+
+
+for ip in ip4_addresses():
+    #    print(ip)
+    if ipaddress.ip_address(ip) in ipaddress.ip_network(sys.argv[1]):
+        sys.exit(0)
+
+sys.exit(1)
